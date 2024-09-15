@@ -29,5 +29,9 @@ var (
 )
 
 func (m model) View() string {
-	return appStyle.Render(m.lists.View())
+	if m.loading {
+		return appStyle.Render("Loding secrets...")
+	} else {
+		return appStyle.Render(m.list.View())
+	}
 }
