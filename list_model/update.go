@@ -1,4 +1,4 @@
-package main
+package listmodel
 
 import (
 	"github.com/charmbracelet/bubbles/key"
@@ -6,7 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		// Don't match any of the keys below if we're actively filtering.
@@ -19,6 +19,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.list.NewStatusMessage(statusMessageStyle("New things"))
 			return m, nil
 
+		case key.Matches(msg, m.keys.edit):
+			cmd := m.list.ToggleSpinner()
+			return m, cmd
 		case key.Matches(msg, m.keys.tab):
 
 			switch m.activeTab {

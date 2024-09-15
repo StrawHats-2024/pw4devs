@@ -1,4 +1,4 @@
-package main
+package listmodel
 
 import (
 	tea "github.com/charmbracelet/bubbletea"

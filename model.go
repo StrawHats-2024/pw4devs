@@ -1,62 +1,34 @@
 package main
 
 import (
-	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/list"
+	authmodel "github.com/StrawHats-2024/pw4devs/auth_model"
+	listmodel "github.com/StrawHats-2024/pw4devs/list_model"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type item struct {
-	title string
-	desc  string
-}
-
-func (i item) Title() string       { return i.title }
-func (i item) Description() string { return i.desc }
-func (i item) FilterValue() string { return i.title }
-
-type Tab int
-
-const (
-	Personal Tab = iota
-	Groups
-	Shared
-)
-
 type model struct {
-	list            list.Model
-	keys            *listKeyMap
-	activeTab       Tab
-	personalSecrets []Secret
-	SharedSecrets   []Secret
-	groups          []Group
-	loading         bool
-	err             error
+	login bool
+	list       listmodel.Model
+	auth       authmodel.Model
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(getPersonalSecrets, getSharedSecrets, getGroups)
+	if m.login {
+		return m.list.Init()
+	}
+	return m.auth.Init()
 }
 
-func newModel() model {
-
-	listKeys := newKeyMap()
-	secretsList := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
-	secretsList.Title = activeTitleStyle.Render("Personal") +
-		" | " + inactiveTitleStyle.Render("Groups") +
-		" | " + inactiveTitleStyle.Render("Shared")
-	secretsList.AdditionalShortHelpKeys = func() []key.Binding {
-		return []key.Binding{
-			listKeys.add,
-			listKeys.edit,
-			listKeys.tab,
-		}
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if m.login {
+		return m.list.Update(msg)
 	}
+	return m.auth.Update(msg)
+}
 
-	return model{
-		list:      secretsList,
-		keys:      listKeys,
-		activeTab: Personal,
-		loading:   true,
+func (m model) View() string {
+	if m.login {
+		return m.list.View()
 	}
+	return m.auth.View()
 }

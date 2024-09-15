@@ -1,4 +1,4 @@
-package main
+package listmodel
 
 import "github.com/charmbracelet/lipgloss"
 
@@ -7,8 +7,8 @@ import "github.com/charmbracelet/lipgloss"
 var (
 	appStyle = lipgloss.NewStyle().Padding(1, 2)
 
-	titleStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#FFFDF5")).
+  titleStyle = lipgloss.NewStyle().
+    Foreground(lipgloss.Color("#FFFDF5")).
 			Background(lipgloss.Color("#25A065")).
 			Padding(0, 1)
 
@@ -28,10 +28,6 @@ var (
 				Padding(0, 1)
 )
 
-func (m model) View() string {
-	if m.loading {
-		return appStyle.Render("Loding secrets...")
-	} else {
-		return appStyle.Render(m.list.View())
-	}
+func (m Model) View() string {
+	return appStyle.Render(m.list.View())
 }

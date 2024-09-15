@@ -1,4 +1,4 @@
-package main
+package listmodel
 
 import "github.com/charmbracelet/bubbles/key"
 
