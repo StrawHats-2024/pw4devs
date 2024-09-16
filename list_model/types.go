@@ -5,6 +5,7 @@ import (
 )
 
 type SecretType string
+type SecretsRecived []Secret
 
 const (
 	SSHKey   SecretType = "ssh_key"

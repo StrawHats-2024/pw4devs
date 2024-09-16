@@ -16,14 +16,14 @@ var currentUserId = -1
 func main() {
 	isLoggedIn := false
 
-	if token, err := readFileContent("./token.txt"); err == nil {
+	if token, err := listmodel.ReadFileContent("./token.txt"); err == nil {
 		if res, err := authmodel.VerifyToken(token); err == nil && res.Valid {
 			isLoggedIn = true
 			currentUserId = res.UserID
 		} else if err != nil {
 			log.Fatal(err)
 		}
-	} else if !errors.Is(err, ErrFileNotFound) {
+	} else if !errors.Is(err, listmodel.ErrFileNotFound) {
 		log.Fatal(err)
 	}
 
@@ -36,8 +36,4 @@ func main() {
 		fmt.Println("err :", err)
 		os.Exit(1)
 	}
-	// err := authmodel.Login("palegar.parikshith@gmail.com", "parikshith44")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 }

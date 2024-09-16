@@ -77,7 +77,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case personalSecretsFetchMsg:
 		m.personalSecrets = msg
-		m.loading = false
 		return m, nil
 
 	case groupsFetchMsg:

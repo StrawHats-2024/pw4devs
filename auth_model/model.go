@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/cursor"
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -25,15 +26,31 @@ var (
 	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Submit"))
 )
 
+type StatusMsg int
+
+const (
+	Filling StatusMsg = iota
+	Loading
+	Success
+)
+
 type Model struct {
 	focusIndex int
 	inputs     []textinput.Model
+	spinner    spinner.Model
 	cursorMode cursor.Mode
+	err        error
+	status     StatusMsg
 }
+
+type errMsg struct{ err error }
+
+func (e errMsg) Error() string { return e.err.Error() }
 
 func InitialModel() Model {
 	m := Model{
 		inputs: make([]textinput.Model, 2),
+		status: Filling,
 	}
 
 	var t textinput.Model
@@ -78,11 +95,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) {
-				err := Login(m.inputs[0].Value(), m.inputs[1].Value())
-				if err != nil {
-					fmt.Printf("Error login: %s", err.Error())
+				m.status = Loading
+				return m, func() tea.Msg {
+					return performLogin(m.inputs[0].Value(), m.inputs[1].Value())
 				}
-				return m, nil
 			}
 			if s == "up" || s == "shift+tab" {
 				m.focusIndex--
@@ -113,6 +129,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			return m, tea.Batch(cmds...)
 		}
+	case StatusMsg:
+		m.status = msg
+		switch msg {
+		case Success:
+			return m, tea.Quit
+		}
+		return m, nil
+	case errMsg:
+		m.err = msg.err
+
 	}
 
 	// Handle character input and blinking
@@ -124,8 +150,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *Model) updateInputs(msg tea.Msg) tea.Cmd {
 	cmds := make([]tea.Cmd, len(m.inputs))
 
-	// Only text inputs with Focus() set will respond, so it's safe to simply
-	// update all of them here without any further logic.
 	for i := range m.inputs {
 		m.inputs[i], cmds[i] = m.inputs[i].Update(msg)
 	}
@@ -149,9 +173,15 @@ func (m Model) View() string {
 	}
 	fmt.Fprintf(&b, "\n\n%s\n\n", *button)
 
-	b.WriteString(helpStyle.Render("cursor mode is "))
-	b.WriteString(cursorModeHelpStyle.Render(m.cursorMode.String()))
-	b.WriteString(helpStyle.Render(" (ctrl+r to change style)"))
+	if m.err != nil {
+		b.WriteString(fmt.Sprintf("\nWe had some trouble: %v\n\n", m.err))
+	}
+	if m.status == Success {
+		return "Login seccessfull"
+	}
+	if m.status == Loading {
+		b.WriteString("Loading...")
+	}
 
 	return b.String()
 }

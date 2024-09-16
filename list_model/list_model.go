@@ -1,6 +1,8 @@
 package listmodel
 
 import (
+	"log"
+
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -23,7 +25,6 @@ const (
 	Shared
 )
 
-
 type Model struct {
 	list            list.Model
 	keys            *listKeyMap
@@ -32,11 +33,17 @@ type Model struct {
 	SharedSecrets   []Secret
 	groups          []Group
 	loading         bool
-	err             error
+	err             errMsg
 }
 
 func (m Model) Init() tea.Cmd {
-	return tea.Batch(getPersonalSecrets, getSharedSecrets, getGroups)
+	return func() tea.Msg {
+		secrets, err := getSecrets()
+		if err != nil {
+			log.Fatal("Failed to fetch: ", err.Error())
+		}
+		return personalSecretsFetchMsg(secrets)
+	}
 }
 
 func NewModel() Model {

@@ -35,6 +35,8 @@ type personalSecretsFetchMsg []Secret
 type sharedSecretsFetchMsg []Secret
 type groupsFetchMsg []Group
 
-type errMsg struct{ error }
+type errMsg struct {
+	err error
+}
 
-func (e errMsg) Error() string { return e.error.Error() }
+func (e errMsg) Error() string { return e.err.Error() }
