@@ -19,6 +19,7 @@ func main() {
 	log.SetOutput(f)
 
 	m := manager.Model{Loading: true}
+	// m := preview.NewPreviewModel()
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
