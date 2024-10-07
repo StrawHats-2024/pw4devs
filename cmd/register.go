@@ -9,6 +9,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"strawhats.pm4dev/internals/utils"
 )
 
@@ -20,6 +21,10 @@ var registerCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 
+		if viper.GetString(utils.AuthTokenKey) != "" {
+			fmt.Printf("Already authenticated")
+			return nil
+		}
 		var email, password string
 		if len(args) == 2 {
 			email = args[0]

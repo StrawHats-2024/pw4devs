@@ -7,6 +7,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"strawhats.pm4dev/internals/utils"
 )
 
 // authCmd represents the auth command
@@ -14,9 +16,18 @@ var authCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Check the current authentication status",
 	Long:  "Displays the current authentication status of the user in the password manager. If authenticated, shows user details.",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// Command logic here
-		fmt.Printf("auth called")
+		if viper.GetString(utils.AuthTokenKey) != "" {
+			fmt.Printf("Logged in as %s\n", viper.GetString(utils.UserEmailKey))
+		} else {
+			fmt.Printf(`User not authenticated.
+Please perform one of the following actions:
+  - auth login
+  - auth register
+`)
+		}
+		return nil
 	},
 }
 

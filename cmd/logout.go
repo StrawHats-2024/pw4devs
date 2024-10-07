@@ -7,6 +7,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"strawhats.pm4dev/internals/utils"
 )
 
 // logoutCmd represents the logout command
@@ -15,7 +17,14 @@ var logoutCmd = &cobra.Command{
 	Short: "Log out from your account",
 	Long:  "Ends the current authenticated session, logging the user out of their password manager account.",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("logout called")
+
+		if viper.GetString(utils.AuthTokenKey) != "" {
+			utils.SetAuthToken("")
+			fmt.Printf("Logout successful!")
+			return
+		} else {
+			fmt.Println("User not authenticated")
+		}
 	},
 }
 

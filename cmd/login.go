@@ -9,6 +9,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"strawhats.pm4dev/internals/utils"
 )
 
@@ -19,6 +20,10 @@ var loginCmd = &cobra.Command{
 	Long:  `Authenticates the user with their credentials. You can provide the email and password as arguments or, if not provided, the CLI will prompt you to enter them interactively.`,
 	Args:  cobra.MaximumNArgs(2), // Accepts up to 2 arguments, or none for interactive input
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if viper.GetString(utils.AuthTokenKey) != "" {
+			fmt.Printf("Already authenticated")
+			return nil
+		}
 		var email, password string
 		if len(args) == 2 {
 			email = args[0]
@@ -50,7 +55,18 @@ var loginCmd = &cobra.Command{
 		}
 		switch response.StatusCode {
 		case http.StatusOK:
-			fmt.Printf("token %s", response.ResBody.Token)
+			authToken := response.ResBody.Token
+			if authToken == "" {
+				return fmt.Errorf("No auth token received.")
+			}
+			err := utils.SetAuthToken(authToken)
+			if err != nil {
+				return err
+			}
+			err = utils.SetUserEmail(email)
+			if err != nil {
+				return err
+			}
 			fmt.Printf("Login successfull!")
 		case http.StatusUnauthorized:
 			fmt.Printf("Unauthorized: %s", response.ResBody.Error)
