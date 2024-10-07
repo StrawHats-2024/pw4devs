@@ -5,9 +5,11 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+	"strawhats.pm4dev/internals/utils"
 )
 
 // loginCmd represents the login command
@@ -16,7 +18,7 @@ var loginCmd = &cobra.Command{
 	Short: "Log in to your account",
 	Long:  `Authenticates the user with their credentials. You can provide the email and password as arguments or, if not provided, the CLI will prompt you to enter them interactively.`,
 	Args:  cobra.MaximumNArgs(2), // Accepts up to 2 arguments, or none for interactive input
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var email, password string
 		if len(args) == 2 {
 			email = args[0]
@@ -24,14 +26,39 @@ var loginCmd = &cobra.Command{
 		} else {
 			form := huh.NewForm(
 				huh.NewGroup(
-					huh.NewInput().Title("Email").Value(&email),
-					huh.NewInput().Title("Password").EchoMode(huh.EchoModePassword).Value(&password),
+					huh.NewInput().Title("Email").Value(&email).
+						Validate(utils.ValidateEmail),
+					huh.NewInput().Title("Password").EchoMode(huh.EchoModePassword).Value(&password).
+						Validate(utils.ValidatePassword),
 				),
 			)
 			form.Run()
 		}
-		fmt.Printf("Logging in with email: %s and password: %s\n", email, password)
-		// Add authentication logic here
+		type LoginResponse struct {
+			Token   string `json:"token"`
+			Error   string `json:"error"`
+			Message string `json:"message"`
+		}
+		type LoginBody struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}
+		response, err := utils.MakeRequest[LoginResponse]("/v1/auth/login",
+			http.MethodPost, LoginBody{Email: email, Password: password}, "")
+		if err != nil {
+			return err
+		}
+		switch response.StatusCode {
+		case http.StatusOK:
+			fmt.Printf("token %s", response.ResBody.Token)
+			fmt.Printf("Login successfull!")
+		case http.StatusUnauthorized:
+			fmt.Printf("Unauthorized: %s", response.ResBody.Error)
+
+		default:
+			return fmt.Errorf("Unknow error encontered")
+		}
+		return nil
 	},
 }
 
