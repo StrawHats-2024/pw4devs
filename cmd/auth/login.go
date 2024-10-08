@@ -1,7 +1,7 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package auth
 
 import (
 	"fmt"
@@ -15,20 +15,24 @@ import (
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
-	Use:   "login [email] [password]",
-	Short: "Log in to your account",
-	Long:  `Authenticates the user with their credentials. You can provide the email and password as arguments or, if not provided, the CLI will prompt you to enter them interactively.`,
-	Args:  cobra.MaximumNArgs(2), // Accepts up to 2 arguments, or none for interactive input
+	Use:   "login",
+	Short: "Log in to the system",
+	Long: `Authenticate a user with their email and password. You can provide the email and password
+as command flags, or if no flags are provided, an interactive form will be presented for input.`,
+	Args: cobra.NoArgs, // No positional arguments, we use flags instead
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if viper.GetString(utils.AuthTokenKey) != "" {
-			fmt.Printf("Already authenticated")
+			fmt.Println("Already authenticated.")
 			return nil
 		}
-		var email, password string
-		if len(args) == 2 {
-			email = args[0]
-			password = args[1]
-		} else {
+
+		// Fetch flag values
+		email, _ := cmd.Flags().GetString("email")
+		password, _ := cmd.Flags().GetString("password")
+
+		// Check if both email and password are provided
+		if email == "" || password == "" {
+			// If not, show interactive form for input
 			form := huh.NewForm(
 				huh.NewGroup(
 					huh.NewInput().Title("Email").Value(&email).
@@ -39,6 +43,8 @@ var loginCmd = &cobra.Command{
 			)
 			form.Run()
 		}
+
+		// Send login request
 		type LoginResponse struct {
 			Token   string `json:"token"`
 			Error   string `json:"error"`
@@ -48,39 +54,46 @@ var loginCmd = &cobra.Command{
 			Email    string `json:"email"`
 			Password string `json:"password"`
 		}
+
 		response, err := utils.MakeRequest[LoginResponse]("/v1/auth/login",
 			http.MethodPost, LoginBody{Email: email, Password: password}, "")
 		if err != nil {
 			return err
 		}
+
+		// Handle response based on status code
 		switch response.StatusCode {
 		case http.StatusOK:
 			authToken := response.ResBody.Token
 			if authToken == "" {
 				return fmt.Errorf("No auth token received.")
 			}
-			err := utils.SetAuthToken(authToken)
-			if err != nil {
+			// Save the auth token and user email
+			if err := utils.SetAuthToken(authToken); err != nil {
 				return err
 			}
-			err = utils.SetUserEmail(email)
-			if err != nil {
+			if err := utils.SetUserEmail(email); err != nil {
 				return err
 			}
-			fmt.Printf("Login successfull!")
+			fmt.Println("Login successful!")
 		case http.StatusUnauthorized:
-			fmt.Printf("Unauthorized: %s", response.ResBody.Error)
-
+			fmt.Printf("Unauthorized: %s\n", response.ResBody.Error)
 		default:
-			return fmt.Errorf("Unknow error encontered")
+			return fmt.Errorf("Unknown error encountered")
 		}
+
 		return nil
 	},
 }
 
 func init() {
-	authCmd.AddCommand(loginCmd)
+	AuthCmd.AddCommand(loginCmd)
+	loginCmd.Flags().StringP("email", "e", "", "User's email address (required)")
+	loginCmd.Flags().StringP("password", "p", "", "User's password (required)")
 
+	// Mark email and password as required flags
+	// loginCmd.MarkFlagRequired("email")
+	// loginCmd.MarkFlagRequired("password")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

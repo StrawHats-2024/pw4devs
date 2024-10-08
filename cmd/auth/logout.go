@@ -1,7 +1,7 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package auth
 
 import (
 	"fmt"
@@ -29,7 +29,7 @@ var logoutCmd = &cobra.Command{
 }
 
 func init() {
-	authCmd.AddCommand(logoutCmd)
+	AuthCmd.AddCommand(logoutCmd)
 
 	// Here you will define your flags and configuration settings.
 

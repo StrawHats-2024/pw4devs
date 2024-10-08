@@ -1,7 +1,7 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package auth
 
 import (
 	"fmt"
@@ -11,8 +11,8 @@ import (
 	"strawhats.pm4dev/internals/utils"
 )
 
-// authCmd represents the auth command
-var authCmd = &cobra.Command{
+// AuthCmd represents the auth command
+var AuthCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Check the current authentication status",
 	Long:  "Displays the current authentication status of the user in the password manager. If authenticated, shows user details.",
@@ -32,7 +32,7 @@ Please perform one of the following actions:
 }
 
 func init() {
-	rootCmd.AddCommand(authCmd)
+	// rootCmd.AddCommand(authCmd)
 
 	// Here you will define your flags and configuration settings.
 
