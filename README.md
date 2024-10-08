@@ -160,14 +160,14 @@ secretscli
   - `--email` (required): Email of the user to add
 - Example: `secretscli group adduser --group developers --email newdev@example.com`
 
-#### removeuser
+#### rmuser
 
 - Short description: Remove a user from a group
 - Long description: Remove a user from an existing group using their email address
 - Flags:
   - `--group` (required): Name of the group
   - `--email` (required): Email of the user to remove
-- Example: `secretscli group removeuser --group developers --email formerdev@example.com`
+- Example: `secretscli group rmuser --group developers --email formerdev@example.com`
 
 ### Share Commands
 

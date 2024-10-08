@@ -22,7 +22,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"strawhats.pm4dev/cmd/auth"
+	"strawhats.pm4dev/cmd/group"
 	"strawhats.pm4dev/cmd/secrets"
+	"strawhats.pm4dev/cmd/sharing"
 )
 
 var cfgFile string
@@ -65,6 +67,8 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.AddCommand(secrets.SecretsCmd)
 	rootCmd.AddCommand(auth.AuthCmd)
+	rootCmd.AddCommand(group.GroupCmd)
+	rootCmd.AddCommand(sharing.ShareCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
