@@ -15,6 +15,7 @@ type ApiResponse[T any] struct {
 }
 
 const API_URL = "http://159.89.173.5:3000"
+// const API_URL = "http://localhost:4000"
 
 // MakeRequest makes an HTTP request with the given parameters and returns an ApiResponse
 func MakeRequest[T any](url, method string, body interface{}, authToken string) (*ApiResponse[T], error) {
