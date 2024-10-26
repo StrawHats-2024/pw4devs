@@ -5,8 +5,11 @@ package secrets
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
 
 	"github.com/spf13/cobra"
+	"strawhats.pm4dev/internals/utils"
 )
 
 // deleteCmd represents the delete command
@@ -17,17 +20,37 @@ var deleteCmd = &cobra.Command{
 You must provide the ID of the secret to be deleted using the --id flag.`,
 	Args: cobra.NoArgs, // No positional arguments, using flags instead
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Fetch the 'id' flag
-		id, _ := cmd.Flags().GetString("id")
-		if id == "" {
+		// Fetch the 'secretID' flag
+		secretID, _ := cmd.Flags().GetString("id")
+		if secretID == "" {
 			return fmt.Errorf("The --id flag is required")
 		}
+		id, err := strconv.Atoi(secretID)
+		if err != nil {
+			return err
+		}
 
-		// Placeholder for delete logic
-		fmt.Printf("Deleting secret with ID: %s\n", id)
-
+		res, err := utils.MakeRequest[any]("/v1/secrets", http.MethodDelete, reqBodyDel{id}, utils.GetAuthtoken())
+		if err != nil {
+			return err
+		}
+		if res.StatusCode == http.StatusNoContent {
+			return nil
+		}
+		switch res.StatusCode {
+		case http.StatusUnauthorized:
+			fmt.Print("Not authorised for this action")
+		case http.StatusUnprocessableEntity:
+			fmt.Print("Invalid request")
+		case http.StatusNotFound:
+			fmt.Printf("\nNo secret found with id: %s", secretID)
+		}
 		return nil
 	},
+}
+
+type reqBodyDel struct {
+	SecretID int `json:"secret_id"`
 }
 
 // Add flags to the command
