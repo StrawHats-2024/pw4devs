@@ -2,8 +2,10 @@ package group
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/spf13/cobra"
+	"strawhats.pm4dev/internals/utils"
 )
 
 // AddUser command
@@ -19,8 +21,25 @@ You must provide the group name and the user's email address using the --group a
 			return fmt.Errorf("Both --group and --email flags are required")
 		}
 		// Placeholder for add user logic
-		fmt.Printf("Adding user %s to group %s\n", email, group)
-		return nil
+		type reqBody struct {
+			GroupName string `json:"group_name"`
+			UserEmail string `json:"user_email"`
+		}
+		res, err := utils.MakeRequest[any]("/v1/group/add_user", http.MethodPost,
+			reqBody{GroupName: group, UserEmail: email}, utils.GetAuthtoken())
+		if err != nil {
+			return err
+		}
+
+		switch res.StatusCode {
+		case http.StatusOK:
+			fmt.Println("res: ", res.ResBody)
+			return nil
+		default:
+			fmt.Println("res: ", res.ResBody)
+			return fmt.Errorf("Request failed with status code: %d", res.StatusCode)
+
+		}
 	},
 }
 
@@ -31,4 +50,3 @@ func init() {
 	addUserCmd.MarkFlagRequired("email")
 	GroupCmd.AddCommand(addUserCmd)
 }
-

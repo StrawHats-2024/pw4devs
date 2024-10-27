@@ -2,8 +2,10 @@ package group
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/spf13/cobra"
+	"strawhats.pm4dev/internals/utils"
 )
 
 // Create command
@@ -18,8 +20,23 @@ You must provide the name of the new group using the --name flag.`,
 			return fmt.Errorf("The --name flag is required")
 		}
 		// Placeholder for create logic
-		fmt.Printf("Creating group: %s\n", name)
-		return nil
+		type reqBody struct {
+			GroupName string `json:"group_name"`
+		}
+		res, err := utils.MakeRequest[any]("/v1/groups", http.MethodPost, reqBody{GroupName: name}, utils.GetAuthtoken())
+		if err != nil {
+			return err
+		}
+		switch res.StatusCode {
+		case http.StatusCreated:
+			// fmt.Println("res: ", res.ResBody)
+			return nil
+		case http.StatusConflict:
+			return fmt.Errorf("Group name already taken")
+		default:
+			return fmt.Errorf("Request failed with status code: %d", res.StatusCode)
+
+		}
 	},
 }
 
