@@ -31,11 +31,18 @@ You can control the number of secrets displayed using the --limit and --offset f
 			offset = 0
 		}
 
+		type resBody struct {
+			Data    []utils.SecretRecord `json:"data"`
+			Message string               `json:"message"`
+		}
 		// Here we would normally call the logic to fetch and list secrets.
 		// Currently, just validating inputs and placeholder message.
-		res, err := utils.MakeRequest[resBodyList]("/v1/secrets/user", http.MethodGet, nil, utils.GetAuthtoken())
+		res, err := utils.MakeRequest[resBody]("/v1/secrets/user", http.MethodGet, nil, utils.GetAuthtoken())
 		if err != nil {
 			return err
+		}
+		if res.StatusCode != http.StatusOK {
+			return fmt.Errorf("Fetch request failed with status code: %d", res.StatusCode)
 		}
 		data := res.ResBody.Data
 		if len(data) > 0 {
@@ -64,9 +71,4 @@ func printSecrets(secrets []utils.SecretRecord) {
 		formattedTime := secret.CreatedAt.Format("Jan 02, 2006 03:04 PM")
 		fmt.Printf("%d\t%s\t\t%s\n", secret.ID, secret.Name, formattedTime)
 	}
-}
-
-type resBodyList struct {
-	Data    []utils.SecretRecord `json:"data"`
-	Message string               `json:"message"`
 }
