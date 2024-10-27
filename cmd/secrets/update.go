@@ -4,9 +4,13 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package secrets
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
 
 	"github.com/spf13/cobra"
+	"strawhats.pm4dev/internals/utils"
 )
 
 // updateCmd represents the update command
@@ -28,15 +32,50 @@ You can change the secret's name, username, and/or password by specifying the co
 			return fmt.Errorf("Secret ID is required. Use --id to specify the ID.")
 		}
 
-		// Ensure that at least one of the update fields is provided
-		if name == "" && username == "" && password == "" {
-			return fmt.Errorf("At least one of --name, --username, or --password must be provided to update the secret.")
+		id, err := strconv.Atoi(secretID)
+		if err != nil {
+			return fmt.Errorf("Invalid secret_id")
 		}
 
-		// No update logic for now, just validating input
-		fmt.Println("Update command validated successfully")
+		//TODO: impliment partial update
+		if name == "" || username == "" || password == "" {
+			return fmt.Errorf("All --name, --username, or --password must be provided to update the secret.")
+		}
+		data := map[string]string{
+			"username": username,
+			"password": password,
+		}
+
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			return err
+		}
+
+		plaintext := string(jsonData)
+		encryptedData, iv, err := utils.EncryptAESGCM(plaintext, utils.GetEncryptionKey())
+		if err != nil {
+			return err
+		}
+		res, err := utils.MakeRequest[any]("/v1/secrets", http.MethodPatch, reqbodyUpdate{SecretID: id,
+			EncryptedData: encryptedData,
+			IV:            iv,
+			Name:          name,
+		}, utils.GetAuthtoken())
+		if err != nil {
+			return err
+		}
+		if res.StatusCode != http.StatusOK {
+			return fmt.Errorf("Request failed with code %d", res.StatusCode)
+		}
 		return nil
 	},
+}
+
+type reqbodyUpdate struct {
+	EncryptedData string `json:"encrypted_data"`
+	IV            string `json:"iv"`
+	Name          string `json:"name"`
+	SecretID      int    `json:"secret_id"`
 }
 
 // Add flags to the command
