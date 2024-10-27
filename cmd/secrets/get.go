@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 	"strawhats.pm4dev/internals/utils"
 )
@@ -34,27 +35,30 @@ while still printing the username.`,
 		}
 		id, err := strconv.Atoi(secretID)
 		if err != nil {
-			return err
+			return fmt.Errorf("Invalid secret_id")
 		}
 
 		res, err := utils.MakeRequest[resBodyGet]("/v1/secrets", http.MethodGet, reqBodyGet{SecretID: id}, utils.GetAuthtoken())
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to make fetch request")
+		}
+		if res.StatusCode != http.StatusOK {
+			return fmt.Errorf("Request failed with status: %d", res.StatusCode)
 		}
 		encryptedData := res.ResBody.Data.EncryptedData
 		iv := res.ResBody.Data.IV
 		decryptedData, err := utils.DecryptAESGCM(string(encryptedData), string(iv), utils.GetEncryptionKey())
 		if err != nil {
-			return err
+			return fmt.Errorf("Error while decrypted data")
 		}
 		credentials, err := utils.ParseJSONToCredentials(decryptedData)
 		if err != nil {
-			return err
+			return fmt.Errorf("Config file corrupted")
 		}
 
 		if copyPassword {
 			fmt.Print(credentials.Username)
-			// TODO: Impliment copy to clipboard
+			return clipboard.WriteAll(credentials.Password)
 
 		} else if getPassword {
 			fmt.Print(credentials.Password)

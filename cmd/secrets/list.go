@@ -5,8 +5,10 @@ package secrets
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/spf13/cobra"
+	"strawhats.pm4dev/internals/utils"
 )
 
 // listCmd represents the list command
@@ -31,7 +33,14 @@ You can control the number of secrets displayed using the --limit and --offset f
 
 		// Here we would normally call the logic to fetch and list secrets.
 		// Currently, just validating inputs and placeholder message.
-		fmt.Printf("Listing secrets with limit: %d and offset: %d\n", limit, offset)
+		res, err := utils.MakeRequest[resBodyList]("/v1/secrets/user", http.MethodGet, nil, utils.GetAuthtoken())
+		if err != nil {
+			return err
+		}
+		data := res.ResBody.Data
+		if len(data) > 0 {
+			printSecrets(data)
+		}
 
 		return nil
 	},
@@ -43,4 +52,21 @@ func init() {
 	listCmd.Flags().IntP("offset", "o", 0, "Number of secrets to skip (for pagination)")
 
 	SecretsCmd.AddCommand(listCmd)
+}
+func printSecrets(secrets []utils.SecretRecord) {
+	// Print a plain-text table header of secrets for piping to `fzf`
+	fmt.Println("ID\tName\t\tCreated At")
+	fmt.Println("---------------------------------------------------")
+
+	// Format each secret's details
+	for _, secret := range secrets {
+		// Format `CreatedAt` to a more readable format
+		formattedTime := secret.CreatedAt.Format("Jan 02, 2006 03:04 PM")
+		fmt.Printf("%d\t%s\t\t%s\n", secret.ID, secret.Name, formattedTime)
+	}
+}
+
+type resBodyList struct {
+	Data    []utils.SecretRecord `json:"data"`
+	Message string               `json:"message"`
 }
