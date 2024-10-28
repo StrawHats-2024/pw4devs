@@ -1,12 +1,7 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package secrets
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
@@ -43,53 +38,10 @@ and type as command flags. If no flags are provided, an interactive form will be
 
 		// Check if all required values are filled
 		if name == "" || username == "" || password == "" {
-			return fmt.Errorf("All fields (name, username, password, type) are required.")
+			return fmt.Errorf("All fields (name, username, password) are required.")
 		}
-		data := map[string]string{
-			"username": username,
-			"password": password,
-		}
-
-		// Step 3: Convert the map to JSON
-		jsonData, err := json.Marshal(data)
-		if err != nil {
-			return err
-		}
-
-		// Step 4: Convert the JSON byte slice to a string
-		plaintext := string(jsonData)
-		encryptedData, iv, err := utils.EncryptAESGCM(plaintext, utils.GetEncryptionKey())
-		if err != nil {
-			return err
-		}
-		res, err := utils.MakeRequest[resBodyCreate]("/v1/secrets",
-			http.MethodPost,
-			reqBodyCreate{EncryptedData: encryptedData, IV: iv, Name: name},
-			utils.GetAuthtoken())
-
-		if err != nil {
-			return err
-		}
-    
-		if res.StatusCode == http.StatusCreated {
-			fmt.Printf("Secret created successfully: %v", res.ResBody.SecretID)
-		} else {
-      fmt.Printf("Error StatusCode: %d", res.StatusCode)
-    }
-
-		return nil
+    return utils.CreateSecret(name, username, password)
 	},
-}
-
-type reqBodyCreate struct {
-	EncryptedData string `json:"encrypted_data"`
-	IV            string `json:"iv"`
-	Name          string `json:"name"`
-}
-
-type resBodyCreate struct {
-	Message  string `json:"message"`
-	SecretID int    `json:"secret_id"`
 }
 
 // Add flags to the command

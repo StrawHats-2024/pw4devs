@@ -30,7 +30,11 @@ You must provide the ID of the secret to be deleted using the --id flag.`,
 			return err
 		}
 
-		res, err := utils.MakeRequest[any]("/v1/secrets", http.MethodDelete, reqBodyDel{id}, utils.GetAuthtoken())
+		type reqBody struct {
+			SecretID int `json:"secret_id"`
+		}
+
+		res, err := utils.MakeRequest[any]("/v1/secrets", http.MethodDelete, reqBody{id}, utils.GetAuthtoken())
 		if err != nil {
 			return err
 		}
@@ -47,10 +51,6 @@ You must provide the ID of the secret to be deleted using the --id flag.`,
 		}
 		return nil
 	},
-}
-
-type reqBodyDel struct {
-	SecretID int `json:"secret_id"`
 }
 
 // Add flags to the command

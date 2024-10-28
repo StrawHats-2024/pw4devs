@@ -13,7 +13,9 @@ import (
 var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 type item struct {
-	title, desc string
+	title, desc       string
+	id                int
+	encryptedData, iv string
 }
 
 func (i item) Title() string       { return i.title }
@@ -31,8 +33,30 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		if msg.String() == "ctrl+c" {
+		switch msg.String() {
+		case "ctrl+c":
 			return m, tea.Quit
+		case "d": // delete item
+			currItem := m.list.SelectedItem()
+			value, ok := currItem.(item)
+			if !ok {
+				return m, m.list.ToggleSpinner()
+			}
+			return m, m.list.NewStatusMessage(fmt.Sprintf("Selected %d: ", value.id))
+		case "u": // copy username
+			currItem := m.list.SelectedItem()
+			value, ok := currItem.(item)
+			if !ok {
+				return m, m.list.NewStatusMessage("Error occured")
+			}
+			return decryptedCredentails(value, &m, "username")
+		case "p": // copy password
+			currItem := m.list.SelectedItem()
+			value, ok := currItem.(item)
+			if !ok {
+				return m, m.list.NewStatusMessage("Error occured")
+			}
+			return decryptedCredentails(value, &m, "password")
 		}
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
@@ -55,7 +79,8 @@ func Run() error {
 		return err
 	}
 	for _, secret := range data {
-		fish := item{title: secret.Name,
+		fish := item{title: secret.Name, id: int(secret.ID),
+			encryptedData: string(secret.EncryptedData), iv: string(secret.IV),
 			desc: fmt.Sprintf("id: %d \t Created on %s", secret.ID,
 				secret.CreatedAt.Format("Jan 02, 2005 03:04 PM")),
 		}

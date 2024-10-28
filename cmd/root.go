@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"strawhats.pm4dev/cmd/auth"
+	"strawhats.pm4dev/cmd/dev"
 	"strawhats.pm4dev/cmd/group"
 	"strawhats.pm4dev/cmd/secrets"
 	"strawhats.pm4dev/cmd/sharing"
@@ -72,6 +73,7 @@ func init() {
 	rootCmd.AddCommand(auth.AuthCmd)
 	rootCmd.AddCommand(group.GroupCmd)
 	rootCmd.AddCommand(sharing.ShareCmd)
+	rootCmd.AddCommand(dev.SeedCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
