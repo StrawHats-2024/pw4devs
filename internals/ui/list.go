@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -89,6 +90,13 @@ func Run() error {
 
 	m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
 	m.list.Title = "Secrets"
+	addtionalKeys := newListKeyMap()
+	m.list.AdditionalShortHelpKeys = func() []key.Binding {
+		return []key.Binding{
+			addtionalKeys.copyUsername,
+			addtionalKeys.copyPossword,
+		}
+	}
 
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
@@ -97,6 +105,24 @@ func Run() error {
 		return err
 	}
 	return nil
+}
+
+type listKeyMap struct {
+	copyPossword key.Binding
+	copyUsername key.Binding
+}
+
+func newListKeyMap() *listKeyMap {
+	return &listKeyMap{
+		copyPossword: key.NewBinding(
+			key.WithKeys("p"),
+			key.WithHelp("p", "copy password"),
+		),
+		copyUsername: key.NewBinding(
+			key.WithKeys("u"),
+			key.WithHelp("u", "copy username"),
+		),
+	}
 }
 
 func fetchSecrets() ([]utils.SecretRecord, error) {
