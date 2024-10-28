@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"strawhats.pm4dev/internals/ui/preview"
 	"strawhats.pm4dev/internals/utils"
 )
 
-var docStyle = lipgloss.NewStyle().Margin(1, 2)
+var docStyle = lipgloss.NewStyle().Margin(1, 2).Width(55)
 
 type item struct {
 	title, desc       string
@@ -24,7 +26,10 @@ func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
 type model struct {
-	list list.Model
+	list      list.Model
+	previewer preview.Model
+	help      help.Model
+	helpKyes  keyMap
 }
 
 func (m model) Init() tea.Cmd {
@@ -70,7 +75,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return docStyle.Render(m.list.View())
+	return lipgloss.JoinHorizontal(0, docStyle.Render(m.list.View()),
+		lipgloss.JoinVertical(0, m.previewer.View(), m.help.View(m.helpKyes)))
 }
 
 func Run() error {
@@ -82,22 +88,20 @@ func Run() error {
 	for _, secret := range data {
 		fish := item{title: secret.Name, id: int(secret.ID),
 			encryptedData: string(secret.EncryptedData), iv: string(secret.IV),
-			desc: fmt.Sprintf("id: %d \t Created on %s", secret.ID,
-				secret.CreatedAt.Format("Jan 02, 2005 03:04 PM")),
+			desc: fmt.Sprintf("id: %d  • last update: %s", secret.ID,
+				secret.CreatedAt.Format("3:04PM 1/2/2006")),
 		}
 		items = append(items, fish)
 	}
-
-	m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
-	m.list.Title = "Secrets"
-	addtionalKeys := newListKeyMap()
-	m.list.AdditionalShortHelpKeys = func() []key.Binding {
-		return []key.Binding{
-			addtionalKeys.copyUsername,
-			addtionalKeys.copyPossword,
-		}
+	helpModel := help.New()
+	helpkeys := newListKeyMap()
+	m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0),
+		previewer: preview.InitalModel(),
+		help:      helpModel,
+		helpKyes:  *helpkeys,
 	}
-
+	m.list.Title = "Secrets"
+	// m.list.SetShowHelp(false)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
 	if _, err := p.Run(); err != nil {
@@ -107,13 +111,25 @@ func Run() error {
 	return nil
 }
 
-type listKeyMap struct {
+type keyMap struct {
 	copyPossword key.Binding
 	copyUsername key.Binding
 }
 
-func newListKeyMap() *listKeyMap {
-	return &listKeyMap{
+func (k keyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.copyPossword, k.copyUsername}
+}
+
+// FullHelp returns keybindings for the expanded help view. It's part of the
+// key.Map interface.
+func (k keyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.copyPossword, k.copyUsername}, // second column
+	}
+}
+
+func newListKeyMap() *keyMap {
+	return &keyMap{
 		copyPossword: key.NewBinding(
 			key.WithKeys("p"),
 			key.WithHelp("p", "copy password"),
