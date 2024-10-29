@@ -25,15 +25,40 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !ok {
 				return m, m.list.NewStatusMessage("Error occured")
 			}
-			return decryptedCredentails(value, &m, "username")
+			return decryptedCredentailsWithCopy(value, &m, "username")
 		case "p": // copy password
 			currItem := m.list.SelectedItem()
 			value, ok := currItem.(item)
 			if !ok {
 				return m, m.list.NewStatusMessage("Error occured")
 			}
-			return decryptedCredentails(value, &m, "password")
+			return decryptedCredentailsWithCopy(value, &m, "password")
+		case "enter":
+			visibleItems := m.list.VisibleItems()
+			if len(visibleItems) > 0 {
+				currItem := m.list.SelectedItem()
+				value, ok := currItem.(item)
+				if !ok {
+					return m, m.list.NewStatusMessage("Error occurred")
+				}
+				return m, func() tea.Msg {
+					data, err := decryptedData(value)
+					if err != nil {
+						return fmt.Errorf("Error while decryptedData")
+					}
+					return data
+				}
+			}
+
 		}
+	case DecryptionResultMsg:
+		m.inputs[nameInput].SetValue(msg.title)
+		m.inputs[usernameInput].SetValue(msg.username)
+		m.inputs[passwordInput].SetValue(msg.password)
+
+	case errMsg:
+		m.list.NewStatusMessage(msg.Error())
+
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
@@ -42,4 +67,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
+}
+
+type DecryptionResultMsg struct {
+	title    string
+	username string
+	password string
+	err      error
 }

@@ -2,14 +2,13 @@ package ui
 
 import "github.com/charmbracelet/bubbles/key"
 
-
 type keyMap struct {
 	copyPossword key.Binding
 	copyUsername key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.copyPossword, k.copyUsername}
+	return []key.Binding{k.copyUsername, k.copyPossword}
 }
 
 // FullHelp returns keybindings for the expanded help view. It's part of the
