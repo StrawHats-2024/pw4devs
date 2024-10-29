@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
@@ -34,4 +35,24 @@ func decryptedCredentails(value item, m *model, copy string) (tea.Model, tea.Cmd
 		}
 		return m, m.list.NewStatusMessage(fmt.Sprintf("Username copied: %s", credentials.Username))
 	}
+}
+
+func fetchSecrets() ([]utils.SecretRecord, error) {
+
+	type resBody struct {
+		Data    []utils.SecretRecord `json:"data"`
+		Message string               `json:"message"`
+	}
+	// Here we would normally call the logic to fetch and list secrets.
+	// Currently, just validating inputs and placeholder message.
+	res, err := utils.MakeRequest[resBody]("/v1/secrets/user", http.MethodGet, nil, utils.GetAuthtoken())
+	if err != nil {
+		return nil, err
+	}
+	data := res.ResBody.Data
+
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Fetch request failed with status code: %d", res.StatusCode)
+	}
+	return data, nil
 }
