@@ -25,7 +25,10 @@ You must provide the group name and the user's email address using the --group a
 			GroupName string `json:"group_name"`
 			UserEmail string `json:"user_email"`
 		}
-		res, err := utils.MakeRequest[any]("/v1/group/add_user", http.MethodPost,
+		type resBody struct {
+			Message string `json:"message"`
+		}
+		res, err := utils.MakeRequest[resBody]("/v1/groups/add_user", http.MethodPost,
 			reqBody{GroupName: group, UserEmail: email}, utils.GetAuthtoken())
 		if err != nil {
 			return err
@@ -33,10 +36,9 @@ You must provide the group name and the user's email address using the --group a
 
 		switch res.StatusCode {
 		case http.StatusOK:
-			fmt.Println("res: ", res.ResBody)
 			return nil
 		default:
-			fmt.Println("res: ", res.ResBody)
+			fmt.Println("Message: ", res.ResBody.Message)
 			return fmt.Errorf("Request failed with status code: %d", res.StatusCode)
 
 		}

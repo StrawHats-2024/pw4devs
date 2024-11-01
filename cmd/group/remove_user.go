@@ -2,8 +2,10 @@ package group
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/spf13/cobra"
+	"strawhats.pm4dev/internals/utils"
 )
 
 // RemoveUser command
@@ -18,9 +20,28 @@ You must provide the group name and the user's email address using the --group a
 		if group == "" || email == "" {
 			return fmt.Errorf("Both --group and --email flags are required")
 		}
-		// Placeholder for remove user logic
-		fmt.Printf("Removing user %s from group %s\n", email, group)
-		return nil
+
+		type reqBody struct {
+			GroupName string `json:"group_name"`
+			UserEmail string `json:"user_email"`
+		}
+		type resBody struct {
+			Message string `json:"message"`
+		}
+		res, err := utils.MakeRequest[resBody]("/v1/groups/remove_user", http.MethodPost,
+			reqBody{GroupName: group, UserEmail: email}, utils.GetAuthtoken())
+		if err != nil {
+			return err
+		}
+
+		switch res.StatusCode {
+		case http.StatusOK:
+			return nil
+		default:
+			fmt.Println("Message: ", res.ResBody)
+			return fmt.Errorf("Request failed with status code: %d", res.StatusCode)
+
+		}
 	},
 }
 
