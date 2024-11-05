@@ -2,8 +2,11 @@ package sharing
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
 
 	"github.com/spf13/cobra"
+	"strawhats.pm4dev/internals/utils"
 )
 
 // ToGroup command
@@ -18,9 +21,33 @@ You must provide the ID of the secret and the name of the group using the --secr
 		if secretID == "" || group == "" {
 			return fmt.Errorf("Both --secret-id and --group flags are required")
 		}
-		// Placeholder for share to group logic
-		fmt.Printf("Sharing secret %s with group %s\n", secretID, group)
-		return nil
+
+		id, err := strconv.Atoi(secretID)
+		if err != nil {
+			return err
+		}
+		type reqBody struct {
+			SecretID   int    `json:"secret_id"`
+			GroupName  string `json:"group_name"`
+			Permission string `json:"permission"`
+		}
+		res, err := utils.MakeRequest[any]("/v1/secrets/share/group", http.MethodPost, reqBody{
+			SecretID:   id,
+			GroupName:  group,
+			Permission: "read-only",
+		}, utils.GetAuthtoken())
+		if err != nil {
+			return err
+		}
+		switch res.StatusCode {
+		case http.StatusCreated:
+			fmt.Println("res: ", res.ResBody)
+			return nil
+		default:
+			fmt.Println("res: ", res.ResBody)
+			return fmt.Errorf("Request failed with response code %d", res.StatusCode)
+
+		}
 	},
 }
 

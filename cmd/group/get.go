@@ -32,8 +32,7 @@ You must provide the name of the group using the --name flag.`,
 		}
 		switch res.StatusCode {
 		case http.StatusOK:
-      //TODO: impliment pretty print
-			fmt.Printf("res: %+v", res.ResBody.Data)
+      prettyPrintGroupUsers(res.ResBody.Data)
 			return nil
 		default:
 			return fmt.Errorf("Request failed with status code: %d", res.StatusCode)
@@ -46,4 +45,14 @@ func init() {
 	getCmd.Flags().StringP("name", "n", "", "Name of the group to retrieve (required)")
 	getCmd.MarkFlagRequired("name")
 	GroupCmd.AddCommand(getCmd)
+}
+
+func prettyPrintGroupUsers(group utils.GroupRecordWithUsers) {
+    totalUsers := len(group.Users)
+    fmt.Printf("Total Users: %d\n", totalUsers)
+    fmt.Println("User Emails:")
+    
+    for _, user := range group.Users {
+        fmt.Println(user.Email)
+    }
 }

@@ -2,8 +2,11 @@ package sharing
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
 
 	"github.com/spf13/cobra"
+	"strawhats.pm4dev/internals/utils"
 )
 
 // ToUser command
@@ -18,9 +21,30 @@ You must provide the ID of the secret and the user's email address using the --s
 		if secretID == "" || email == "" {
 			return fmt.Errorf("Both --secret-id and --email flags are required")
 		}
+		id, err := strconv.Atoi(secretID)
+		if err != nil {
+			return err
+		}
+		type reqBody struct {
+			SecretID   int    `json:"secret_id"`
+			UserEmail  string `json:"user_email"`
+			Permission string `json:"permission"`
+		}
 		// Placeholder for share to user logic
-		fmt.Printf("Sharing secret %s with user %s\n", secretID, email)
-		return nil
+		res, err := utils.MakeRequest[any]("/v1/secrets/share/user", http.MethodPost, reqBody{
+			SecretID:   id,
+			UserEmail:  email,
+			Permission: "read-only",
+		}, utils.GetAuthtoken())
+
+		switch res.StatusCode {
+		case http.StatusCreated:
+			return nil
+
+		default:
+			fmt.Println("res: ", res.ResBody)
+			return fmt.Errorf("Request failed with response code %d", res.StatusCode)
+		}
 	},
 }
 

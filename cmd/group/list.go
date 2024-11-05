@@ -28,7 +28,9 @@ You can specify the maximum number of groups to display and the number of groups
 		}
 		switch res.StatusCode {
 		case http.StatusOK:
-			fmt.Println("res: ", res)
+      for _, group := range res.ResBody.Data {
+        fmt.Println(group.Name)
+      }
 			return nil
 		default:
 			return fmt.Errorf("Request failed with status code: %d", res.StatusCode)
