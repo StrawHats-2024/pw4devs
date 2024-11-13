@@ -7,7 +7,7 @@ This CLI tool is designed to manage authentication, secrets, groups, and sharing
 ## Command Structure
 
 ```
-secretscli
+dv
 ├── auth
 │   ├── login
 │   ├── register
@@ -42,7 +42,7 @@ secretscli
 - Flags:
   - `--email` (required): User's email address
   - `--password` (required): User's password
-- Example: `secretscli auth login --email user@example.com --password mysecurepassword`
+- Example: `dv auth login --email user@example.com --password mysecurepassword`
 
 #### register
 
@@ -51,13 +51,13 @@ secretscli
 - Flags:
   - `--email` (required): New user's email address
   - `--password` (required): New user's password
-- Example: `secretscli auth register --email newuser@example.com --password mysecurepassword`
+- Example: `dv auth register --email newuser@example.com --password mysecurepassword`
 
 #### logout
 
 - Short description: Log out from the system
 - Long description: End the current user session and clear authentication tokens
-- Example: `secretscli auth logout`
+- Example: `dv auth logout`
 
 ### Secrets Commands
 
@@ -69,7 +69,7 @@ secretscli
   - `--name` (required): Name of the secret
   - `--username` (required): Username for the secret
   - `--password` (required): Password for the secret
-- Example: `secretscli secrets create --name myapi --username apiuser --password apisecret `
+- Example: `dv secrets create --name myapi --username apiuser --password apisecret `
 
 #### get
 
@@ -77,7 +77,7 @@ secretscli
 - Long description: Fetch and display a secret by its ID
 - Flags:
   - `--id` (required): ID of the secret to retrieve
-- Example: `secretscli secrets get --id 12345`
+- Example: `dv secrets get --id 12345`
 
 #### update
 
@@ -88,7 +88,7 @@ secretscli
   - `--name`: New name for the secret
   - `--username`: New username for the secret
   - `--password`: New password for the secret
-- Example: `secretscli secrets update --id 12345 --password newsecretpassword`
+- Example: `dv secrets update --id 12345 --password newsecretpassword`
 
 #### delete
 
@@ -96,7 +96,7 @@ secretscli
 - Long description: Remove a secret from the system by its ID
 - Flags:
   - `--id` (required): ID of the secret to delete
-- Example: `secretscli secrets delete --id 12345`
+- Example: `dv secrets delete --id 12345`
 
 #### list
 
@@ -105,7 +105,7 @@ secretscli
 - Flags:
   - `--limit`: Maximum number of secrets to display (default: 10)
   - `--offset`: Number of secrets to skip (for pagination)
-- Example: `secretscli secrets list --limit 20 --offset 40`
+- Example: `dv secrets list --limit 20 --offset 40`
 
 ### Group Commands
 
@@ -115,15 +115,17 @@ secretscli
 - Long description: Create a new group with a specified name
 - Flags:
   - `--name` (required): Name of the new group
-- Example: `secretscli group create --name developers`
+- Example: `dv group create --name developers`
 
 #### get
 
 - Short description: Retrieve group information
-- Long description: Display details of a group by its name
+- Long description: Display details of a group by its name, by default list secrets shared with the group.
+  Use `--users` flag to get list of user present in the group
 - Flags:
   - `--name` (required): Name of the group to retrieve
-- Example: `secretscli group get --name developers`
+  - `--users`: Name of the group to retrieve
+- Example: `dv group get --name developers`
 
 #### update
 
@@ -132,7 +134,7 @@ secretscli
 - Flags:
   - `--oldname` (required): Current name of the group
   - `--newname` (required): New name for the group
-- Example: `secretscli group update --oldname developers --newname engineering`
+- Example: `dv group update --oldname developers --newname engineering`
 
 #### delete
 
@@ -140,16 +142,13 @@ secretscli
 - Long description: Remove a group from the system by its name
 - Flags:
   - `--name` (required): Name of the group to delete
-- Example: `secretscli group delete --name obsolete-group`
+- Example: `dv group delete --name obsolete-group`
 
 #### list
 
 - Short description: List all groups
 - Long description: Display a list of all groups accessible to the current user
-- Flags:
-  - `--limit`: Maximum number of groups to display (default: 10)
-  - `--offset`: Number of groups to skip (for pagination)
-- Example: `secretscli group list --limit 20 --offset 40`
+- Example: `dv group list`
 
 #### adduser
 
@@ -158,7 +157,7 @@ secretscli
 - Flags:
   - `--group` (required): Name of the group
   - `--email` (required): Email of the user to add
-- Example: `secretscli group adduser --group developers --email newdev@example.com`
+- Example: `dv group adduser --group developers --email newdev@example.com`
 
 #### rmuser
 
@@ -167,7 +166,7 @@ secretscli
 - Flags:
   - `--group` (required): Name of the group
   - `--email` (required): Email of the user to remove
-- Example: `secretscli group rmuser --group developers --email formerdev@example.com`
+- Example: `dv group rmuser --group developers --email formerdev@example.com`
 
 ### Share Commands
 
@@ -178,7 +177,7 @@ secretscli
 - Flags:
   - `--secret-id` (required): ID of the secret to share
   - `--group` (required): Name of the group to share with
-- Example: `secretscli share togroup --secret-id 12345 --group developers`
+- Example: `dv share togroup --secret-id 12345 --group developers`
 
 #### touser
 
@@ -187,35 +186,4 @@ secretscli
 - Flags:
   - `--secret-id` (required): ID of the secret to share
   - `--email` (required): Email of the user to share with
-- Example: `secretscli share touser --secret-id 12345 --email collaborator@example.com`
-
-## Global Flags
-
-- `--verbose`: Enable verbose output for debugging (boolean flag)
-- `--config`: Path to the configuration file (default: ~/.secretscli.yaml)
-
-## Configuration
-
-The CLI tool will use a configuration file (default: ~/.secretscli.yaml) to store settings such as API endpoints, default values, and user preferences. Users can specify a different configuration file using the `--config` global flag.
-
-## Error Handling
-
-All commands should provide clear error messages when operations fail, including:
-- Authentication errors
-- Network connectivity issues
-- Invalid input
-- Permission denied errors
-
-## Security Considerations
-
-- Implement secure storage for authentication tokens
-- Use HTTPS for all API communications
-- Implement rate limiting to prevent brute-force attacks
-- Ensure proper input validation and sanitization
-
-## Future Enhancements
-
-- Implement multi-factor authentication
-- Add support for importing/exporting secrets
-- Implement audit logging for security-sensitive operations
-- Add support for secret rotation
+- Example: `dv share touser --secret-id 12345 --email collaborator@example.com`

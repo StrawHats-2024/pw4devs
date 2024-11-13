@@ -19,17 +19,6 @@ var listCmd = &cobra.Command{
 You can control the number of secrets displayed using the --limit and --offset flags for pagination.`,
 	Args: cobra.NoArgs, // No positional arguments, using flags instead
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Fetch flag values for pagination
-		limit, _ := cmd.Flags().GetInt("limit")
-		offset, _ := cmd.Flags().GetInt("offset")
-
-		// Default values for limit and offset
-		if limit <= 0 {
-			limit = 10
-		}
-		if offset < 0 {
-			offset = 0
-		}
 
 		type resBody struct {
 			Data    []utils.SecretRecord `json:"data"`
@@ -55,8 +44,6 @@ You can control the number of secrets displayed using the --limit and --offset f
 
 // Add flags to the command
 func init() {
-	listCmd.Flags().IntP("limit", "l", 10, "Maximum number of secrets to display (default: 10)")
-	listCmd.Flags().IntP("offset", "o", 0, "Number of secrets to skip (for pagination)")
 
 	SecretsCmd.AddCommand(listCmd)
 }

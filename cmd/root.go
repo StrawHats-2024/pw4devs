@@ -93,7 +93,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".strawhats.pm4dev" (without extension).
 		viper.AddConfigPath(home)
-		viper.AddConfigPath(".")
+		// viper.AddConfigPath(".")
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".pm4devs.yaml")
 	}

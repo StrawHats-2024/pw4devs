@@ -14,9 +14,9 @@ type ApiResponse[T any] struct {
 	ResBody    T   `json:"resBody"`
 }
 
-// const API_URL = "http://159.89.173.5:3000"
+const API_URL = "http://68.183.90.31:3000"
 
-const API_URL = "http://localhost:3000"
+// const API_URL = "http://localhost:3000"
 
 // MakeRequest makes an HTTP request with the given parameters and returns an ApiResponse
 func MakeRequest[T any](url, method string, body interface{}, authToken string) (*ApiResponse[T], error) {
@@ -61,4 +61,18 @@ func MakeRequest[T any](url, method string, body interface{}, authToken string) 
 
 	// Return the response
 	return &ApiResponse[T]{StatusCode: resp.StatusCode, ResBody: parsedBody}, nil
+}
+
+
+func PrintSecrets(secrets []SecretRecord) {
+	// Print a plain-text table header of secrets for piping to `fzf`
+	fmt.Println("ID\tName\t\tCreated At")
+	fmt.Println("---------------------------------------------------")
+
+	// Format each secret's details
+	for _, secret := range secrets {
+		// Format `CreatedAt` to a more readable format
+		formattedTime := secret.CreatedAt.Format("Jan 02, 2006 03:04 PM")
+		fmt.Printf("%d\t%s\t\t%s\n", secret.ID, secret.Name, formattedTime)
+	}
 }

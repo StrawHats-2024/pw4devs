@@ -84,3 +84,5 @@ func fetchSecrets() ([]utils.SecretRecord, error) {
 func maskPassword(password string) string {
 	return strings.Repeat("•", len(password))
 }
+
+

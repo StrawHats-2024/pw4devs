@@ -19,8 +19,6 @@ func CreateSecret(name, username, password string) error {
 
 	plaintext := string(jsonData)
 	encryptedData, iv, err := EncryptAESGCM(plaintext, GetEncryptionKey())
-  fmt.Println("iv: ", iv);
-  fmt.Println("encryptedData: ", encryptedData);
 	if err != nil {
 		return err
 	}
