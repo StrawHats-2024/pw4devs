@@ -5,7 +5,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
-	"strawhats.pm4dev/internals/utils"
+	"dv/internals/utils"
 )
 
 // createCmd represents the create command

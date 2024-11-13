@@ -21,20 +21,20 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"strawhats.pm4dev/cmd/auth"
-	"strawhats.pm4dev/cmd/dev"
-	"strawhats.pm4dev/cmd/group"
-	"strawhats.pm4dev/cmd/secrets"
-	"strawhats.pm4dev/cmd/sharing"
-	"strawhats.pm4dev/internals/ui"
-	"strawhats.pm4dev/internals/utils"
+	"dv/cmd/auth"
+	"dv/cmd/dev"
+	"dv/cmd/group"
+	"dv/cmd/secrets"
+	"dv/cmd/sharing"
+	"dv/internals/ui"
+	"dv/internals/utils"
 )
 
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "strawhats.pm4dev",
+	Use:   "dv",
 	Short: "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
@@ -69,7 +69,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.strawhats.pm4dev.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.dv.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -79,6 +79,7 @@ func init() {
 	rootCmd.AddCommand(group.GroupCmd)
 	rootCmd.AddCommand(sharing.ShareCmd)
 	rootCmd.AddCommand(dev.SeedCmd)
+	rootCmd.AddCommand(completionCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -91,7 +92,7 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".strawhats.pm4dev" (without extension).
+		// Search config in home directory with name ".dv" (without extension).
 		viper.AddConfigPath(home)
 		// viper.AddConfigPath(".")
 		viper.SetConfigType("yaml")

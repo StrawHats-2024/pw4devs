@@ -10,7 +10,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
-	"strawhats.pm4dev/internals/utils"
+	"dv/internals/utils"
 )
 
 var getCmd = &cobra.Command{

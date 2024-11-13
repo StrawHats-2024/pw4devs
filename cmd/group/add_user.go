@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
-	"strawhats.pm4dev/internals/utils"
+	"dv/internals/utils"
 )
 
 // AddUser command

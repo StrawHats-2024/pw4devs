@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"strawhats.pm4dev/internals/utils"
+	"dv/internals/utils"
 )
 
 // AuthCmd represents the auth command

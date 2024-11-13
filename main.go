@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "strawhats.pm4dev/cmd"
+import "dv/cmd"
 
 func main() {
 	cmd.Execute()

@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"strawhats.pm4dev/internals/utils"
+	"dv/internals/utils"
 )
 
 // deleteCmd represents the delete command

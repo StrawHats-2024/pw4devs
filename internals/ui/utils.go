@@ -7,8 +7,8 @@ import (
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
-	"strawhats.pm4dev/internals/encryption"
-	"strawhats.pm4dev/internals/utils"
+	"dv/internals/encryption"
+	"dv/internals/utils"
 )
 
 func decryptedCredentailsWithCopy(value item, m *model, copy string) (tea.Model, tea.Cmd) {

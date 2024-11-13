@@ -2,7 +2,7 @@ package dev
 
 import (
 	"github.com/spf13/cobra"
-	"strawhats.pm4dev/internals/utils"
+	"dv/internals/utils"
 )
 
 // SeedCmd represents the auth command
